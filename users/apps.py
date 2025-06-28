@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class Spacehackers2Config(AppConfig):
+class UsersConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'spacehackers_2'
+    name = 'users'
