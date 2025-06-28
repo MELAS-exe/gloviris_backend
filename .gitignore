@@ -8,3 +8,5 @@ venv
 *.pyz
 *.pywz
 __pycache__
+
+db.sqlite3
