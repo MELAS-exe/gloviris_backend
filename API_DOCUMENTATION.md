@@ -1,14 +1,20 @@
-# API Documentation - Authentification JWT
+# API Documentation - SpaceHack2
 
-## Base URL
-```
-http://localhost:8000/users/
-```
+## Table des matières
+- [Authentification](#authentification)
+- [Gestion des utilisateurs](#gestion-des-utilisateurs)
+- [Plantes](#plantes)
+- [Sols](#sols)
+- [Relations Plantes-Sols](#relations-plantes-sols)
 
-## Endpoints
+---
 
-### 1. Inscription (Register)
-**POST** `/register/`
+## Authentification
+
+### Inscription d'un utilisateur
+**POST** `/users/register/`
+
+**Description :** Crée un nouveau compte utilisateur
 
 **Corps de la requête :**
 ```json
@@ -19,12 +25,12 @@ http://localhost:8000/users/
     "password2": "motdepasse123",
     "first_name": "John",
     "last_name": "Doe",
-    "phone_number": "+1234567890",
+    "phone_number": "+33123456789",
     "date_of_birth": "1990-01-01"
 }
 ```
 
-**Réponse :**
+**Réponse (201 Created) :**
 ```json
 {
     "message": "Utilisateur créé avec succès",
@@ -34,7 +40,7 @@ http://localhost:8000/users/
         "email": "john@example.com",
         "first_name": "John",
         "last_name": "Doe",
-        "phone_number": "+1234567890",
+        "phone_number": "+33123456789",
         "date_of_birth": "1990-01-01",
         "is_verified": false,
         "created_at": "2024-01-01T12:00:00Z"
@@ -46,8 +52,10 @@ http://localhost:8000/users/
 }
 ```
 
-### 2. Connexion (Login)
-**POST** `/login/`
+### Connexion utilisateur
+**POST** `/users/login/`
+
+**Description :** Authentifie un utilisateur et retourne les tokens JWT
 
 **Corps de la requête :**
 ```json
@@ -57,7 +65,7 @@ http://localhost:8000/users/
 }
 ```
 
-**Réponse :**
+**Réponse (200 OK) :**
 ```json
 {
     "message": "Connexion réussie",
@@ -67,7 +75,7 @@ http://localhost:8000/users/
         "email": "john@example.com",
         "first_name": "John",
         "last_name": "Doe",
-        "phone_number": "+1234567890",
+        "phone_number": "+33123456789",
         "date_of_birth": "1990-01-01",
         "is_verified": false,
         "created_at": "2024-01-01T12:00:00Z"
@@ -79,27 +87,12 @@ http://localhost:8000/users/
 }
 ```
 
-### 3. Rafraîchissement du Token
-**POST** `/token/refresh/`
+### Déconnexion
+**POST** `/users/logout/`
 
-**Corps de la requête :**
-```json
-{
-    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
-}
-```
+**Description :** Déconnecte l'utilisateur en invalidant le token de rafraîchissement
 
-**Réponse :**
-```json
-{
-    "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
-}
-```
-
-### 4. Déconnexion (Logout)
-**POST** `/logout/`
-
-**Headers :**
+**Headers requis :**
 ```
 Authorization: Bearer <access_token>
 ```
@@ -111,22 +104,47 @@ Authorization: Bearer <access_token>
 }
 ```
 
-**Réponse :**
+**Réponse (200 OK) :**
 ```json
 {
     "message": "Déconnexion réussie"
 }
 ```
 
-### 5. Profil Utilisateur
-**GET** `/profile/`
+### Rafraîchissement du token
+**POST** `/users/token/refresh/`
 
-**Headers :**
+**Description :** Génère un nouveau token d'accès à partir du token de rafraîchissement
+
+**Corps de la requête :**
+```json
+{
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+}
+```
+
+**Réponse (200 OK) :**
+```json
+{
+    "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+}
+```
+
+---
+
+## Gestion des utilisateurs
+
+### Profil utilisateur
+**GET** `/users/profile/`
+
+**Description :** Récupère le profil de l'utilisateur connecté
+
+**Headers requis :**
 ```
 Authorization: Bearer <access_token>
 ```
 
-**Réponse :**
+**Réponse (200 OK) :**
 ```json
 {
     "id": 1,
@@ -134,16 +152,18 @@ Authorization: Bearer <access_token>
     "email": "john@example.com",
     "first_name": "John",
     "last_name": "Doe",
-    "phone_number": "+1234567890",
+    "phone_number": "+33123456789",
     "date_of_birth": "1990-01-01",
     "is_verified": false,
     "created_at": "2024-01-01T12:00:00Z"
 }
 ```
 
-**PUT/PATCH** `/profile/`
+**PUT** `/users/profile/`
 
-**Headers :**
+**Description :** Met à jour le profil de l'utilisateur connecté
+
+**Headers requis :**
 ```
 Authorization: Bearer <access_token>
 ```
@@ -151,23 +171,41 @@ Authorization: Bearer <access_token>
 **Corps de la requête :**
 ```json
 {
-    "first_name": "John Updated",
-    "phone_number": "+1234567891"
+    "first_name": "John",
+    "last_name": "Smith",
+    "phone_number": "+33987654321"
 }
 ```
 
-### 6. Informations Utilisateur
-**GET** `/user-info/`
+### Informations utilisateur
+**GET** `/users/user-info/`
 
-**Headers :**
+**Description :** Récupère les informations de l'utilisateur connecté
+
+**Headers requis :**
 ```
 Authorization: Bearer <access_token>
 ```
 
-**Réponse :** (même format que le profil)
+**Réponse (200 OK) :**
+```json
+{
+    "id": 1,
+    "username": "john_doe",
+    "email": "john@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone_number": "+33123456789",
+    "date_of_birth": "1990-01-01",
+    "is_verified": false,
+    "created_at": "2024-01-01T12:00:00Z"
+}
+```
 
-### 7. Demande de Réinitialisation de Mot de Passe
-**POST** `/password/reset/`
+### Demande de réinitialisation de mot de passe
+**POST** `/users/password/reset/`
+
+**Description :** Envoie un email de réinitialisation de mot de passe
 
 **Corps de la requête :**
 ```json
@@ -176,15 +214,17 @@ Authorization: Bearer <access_token>
 }
 ```
 
-**Réponse :**
+**Réponse (200 OK) :**
 ```json
 {
     "message": "Un email de réinitialisation a été envoyé à votre adresse email."
 }
 ```
 
-### 8. Confirmation de Réinitialisation de Mot de Passe
-**POST** `/password/reset/confirm/`
+### Confirmation de réinitialisation de mot de passe
+**POST** `/users/password/reset/confirm/`
+
+**Description :** Confirme la réinitialisation du mot de passe avec le token reçu
 
 **Corps de la requête :**
 ```json
@@ -195,17 +235,19 @@ Authorization: Bearer <access_token>
 }
 ```
 
-**Réponse :**
+**Réponse (200 OK) :**
 ```json
 {
     "message": "Mot de passe mis à jour avec succès."
 }
 ```
 
-### 9. Changement de Mot de Passe
-**POST** `/password/change/`
+### Changement de mot de passe
+**POST** `/users/password/change/`
 
-**Headers :**
+**Description :** Change le mot de passe de l'utilisateur connecté
+
+**Headers requis :**
 ```
 Authorization: Bearer <access_token>
 ```
@@ -219,80 +261,261 @@ Authorization: Bearer <access_token>
 }
 ```
 
-**Réponse :**
+**Réponse (200 OK) :**
 ```json
 {
     "message": "Mot de passe modifié avec succès."
 }
 ```
 
-## Utilisation des Tokens JWT
+---
 
-### Authentification
-Pour les endpoints protégés, incluez le token d'accès dans l'en-tête :
+## Plantes
+
+### Liste des plantes
+**GET** `/api/plants/`
+
+**Description :** Récupère la liste de toutes les plantes avec un aperçu des sols compatibles
+
+**Réponse (200 OK) :**
+```json
+[
+    {
+        "id": 1,
+        "name": "Tomate",
+        "image": "/media/image/plant/tomate.jpg",
+        "description": "Plante annuelle de la famille des Solanacées",
+        "soils_count": 3
+    },
+    {
+        "id": 2,
+        "name": "Carotte",
+        "image": "/media/image/plant/carotte.jpg",
+        "description": "Légume racine de la famille des Apiacées",
+        "soils_count": 2
+    }
+]
 ```
-Authorization: Bearer <access_token>
+
+### Détails d'une plante
+**GET** `/api/plants/{id}/`
+
+**Description :** Récupère les détails complets d'une plante spécifique
+
+**Paramètres :**
+- `id` (integer) : ID de la plante
+
+**Réponse (200 OK) :**
+```json
+{
+    "id": 1,
+    "name": "Tomate",
+    "image": "/media/image/plant/tomate.jpg",
+    "description": "Plante annuelle de la famille des Solanacées, cultivée pour ses fruits comestibles. Elle nécessite un sol bien drainé et riche en matière organique."
+}
 ```
 
-### Durée de vie des tokens
-- **Access Token** : 60 minutes
-- **Refresh Token** : 24 heures
+---
 
-### Gestion des erreurs
-Les erreurs communes incluent :
-- `400 Bad Request` : Données invalides
-- `401 Unauthorized` : Token manquant ou invalide
-- `403 Forbidden` : Permissions insuffisantes
-- `404 Not Found` : Ressource non trouvée
+## Sols
 
-## Test avec curl
+### Liste des sols
+**GET** `/api/soils/`
 
-### Inscription
+**Description :** Récupère la liste de tous les sols avec un aperçu des plantes cultivables
+
+**Réponse (200 OK) :**
+```json
+[
+    {
+        "id": 1,
+        "name": "Terreau universel",
+        "image": "/media/image/soil/terreau.jpg",
+        "description": "Mélange équilibré pour la plupart des plantes",
+        "plants_count": 5
+    },
+    {
+        "id": 2,
+        "name": "Terre de bruyère",
+        "image": "/media/image/soil/bruyere.jpg",
+        "description": "Sol acide pour plantes acidophiles",
+        "plants_count": 3
+    }
+]
+```
+
+### Détails d'un sol
+**GET** `/api/soils/{id}/`
+
+**Description :** Récupère les détails complets d'un sol spécifique avec toutes les plantes cultivables
+
+**Paramètres :**
+- `id` (integer) : ID du sol
+
+**Réponse (200 OK) :**
+```json
+{
+    "id": 1,
+    "name": "Terreau universel",
+    "image": "/media/image/soil/terreau.jpg",
+    "description": "Mélange équilibré composé de tourbe, de compost et de sable. Idéal pour la plupart des plantes d'intérieur et de jardin.",
+    "plants": [
+        {
+            "id": 1,
+            "name": "Tomate",
+            "image": "/media/image/plant/tomate.jpg",
+            "description": "Plante annuelle de la famille des Solanacées"
+        },
+        {
+            "id": 2,
+            "name": "Carotte",
+            "image": "/media/image/plant/carotte.jpg",
+            "description": "Légume racine de la famille des Apiacées"
+        }
+    ]
+}
+```
+
+---
+
+## Relations Plantes-Sols
+
+### Plantes cultivables dans un sol
+**GET** `/api/soils/{soil_id}/plants/`
+
+**Description :** Récupère toutes les plantes qui peuvent être cultivées dans un sol spécifique
+
+**Paramètres :**
+- `soil_id` (integer) : ID du sol
+
+**Réponse (200 OK) :**
+```json
+{
+    "soil": {
+        "id": 1,
+        "name": "Terreau universel"
+    },
+    "plants": [
+        {
+            "id": 1,
+            "name": "Tomate",
+            "image": "/media/image/plant/tomate.jpg",
+            "description": "Plante annuelle de la famille des Solanacées"
+        },
+        {
+            "id": 2,
+            "name": "Carotte",
+            "image": "/media/image/plant/carotte.jpg",
+            "description": "Légume racine de la famille des Apiacées"
+        }
+    ],
+    "count": 2
+}
+```
+
+### Sols compatibles pour une plante
+**GET** `/api/plants/{plant_id}/soils/`
+
+**Description :** Récupère tous les sols compatibles pour cultiver une plante spécifique
+
+**Paramètres :**
+- `plant_id` (integer) : ID de la plante
+
+**Réponse (200 OK) :**
+```json
+{
+    "plant": {
+        "id": 1,
+        "name": "Tomate"
+    },
+    "soils": [
+        {
+            "id": 1,
+            "name": "Terreau universel",
+            "image": "/media/image/soil/terreau.jpg",
+            "description": "Mélange équilibré pour la plupart des plantes",
+            "plants_count": 5
+        },
+        {
+            "id": 3,
+            "name": "Terreau potager",
+            "image": "/media/image/soil/potager.jpg",
+            "description": "Spécialement formulé pour les légumes",
+            "plants_count": 4
+        }
+    ],
+    "count": 2
+}
+```
+
+---
+
+## Codes d'erreur
+
+### Erreurs d'authentification
+- **401 Unauthorized** : Token d'accès manquant ou invalide
+- **403 Forbidden** : Permissions insuffisantes
+
+### Erreurs de validation
+- **400 Bad Request** : Données de requête invalides
+- **404 Not Found** : Ressource non trouvée
+
+### Erreurs serveur
+- **500 Internal Server Error** : Erreur interne du serveur
+
+---
+
+## Exemples d'utilisation
+
+### Authentification complète
 ```bash
-curl -X POST http://localhost:8000/api/users/register/ \
+# 1. Inscription
+curl -X POST http://localhost:8000/users/register/ \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "testuser",
+    "username": "test_user",
     "email": "test@example.com",
-    "password": "testpass123",
-    "password2": "testpass123",
+    "password": "password123",
+    "password2": "password123",
     "first_name": "Test",
     "last_name": "User"
   }'
-```
 
-### Connexion
-```bash
-curl -X POST http://localhost:8000/api/users/login/ \
+# 2. Connexion
+curl -X POST http://localhost:8000/users/login/ \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
-    "password": "testpass123"
+    "password": "password123"
   }'
-```
 
-### Accès au profil (avec token)
-```bash
-curl -X GET http://localhost:8000/api/users/profile/ \
+# 3. Utilisation du token
+curl -X GET http://localhost:8000/users/profile/ \
   -H "Authorization: Bearer <access_token>"
 ```
 
-## Configuration Email
+### Consultation des plantes et sols
+```bash
+# Liste des plantes
+curl -X GET http://localhost:8000/api/plants/
 
-Pour la production, configurez les paramètres SMTP dans `settings.py` :
+# Détails d'une plante
+curl -X GET http://localhost:8000/api/plants/1/
 
-```python
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your-email@gmail.com'
-EMAIL_HOST_PASSWORD = 'your-app-password'
-DEFAULT_FROM_EMAIL = 'your-email@gmail.com'
+# Sols compatibles pour une plante
+curl -X GET http://localhost:8000/api/plants/1/soils/
+
+# Plantes cultivables dans un sol
+curl -X GET http://localhost:8000/api/soils/1/plants/
 ```
 
-## Sécurité
+---
 
-- Les mots de passe sont hashés avec bcrypt
-- Les tokens JWT sont signés avec HS256
-- Les tokens de récupération expirent après 24 heures
-- CORS est configuré pour le développement (à ajuster pour la production) 
+## Notes importantes
+
+1. **Authentification** : Les endpoints d'authentification ne nécessitent pas de token
+2. **Permissions** : Les APIs de plantes et sols sont publiques (pas d'authentification requise)
+3. **Images** : Les URLs des images sont relatives au domaine de l'API
+4. **Pagination** : Les listes ne sont pas paginées pour le moment
+5. **Filtrage** : Aucun filtre n'est disponible actuellement
+6. **Tri** : Les résultats sont triés par ordre d'ID croissant 
