@@ -192,3 +192,80 @@ def user_info(request):
     user = request.user
     serializer = UserProfileSerializer(user)
     return Response(serializer.data)
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from .models import PlantAnalysis
+from .serializers import PlantAnalysisSerializer
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_analysis_history(request):
+    """Get user's plant analysis history"""
+    try:
+        analyses = PlantAnalysis.objects.filter(user=request.user)
+        serializer = PlantAnalysisSerializer(analyses, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({
+            'error': f'Failed to fetch analysis history: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def save_plant_analysis(request):
+    """Save a new plant analysis result"""
+    try:
+        data = request.data.copy()
+        data['user'] = request.user.id
+        
+        serializer = PlantAnalysisSerializer(data=data)
+        if serializer.is_valid():
+            analysis = serializer.save(user=request.user)
+            return Response(
+                PlantAnalysisSerializer(analysis).data, 
+                status=status.HTTP_201_CREATED
+            )
+        else:
+            return Response(
+                {'error': 'Invalid data', 'details': serializer.errors}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    except Exception as e:
+        return Response({
+            'error': f'Failed to save analysis: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def analysis_statistics(request):
+    """Get user's analysis statistics"""
+    try:
+        user_analyses = PlantAnalysis.objects.filter(user=request.user)
+        
+        total_analyses = user_analyses.count()
+        healthy_plants = user_analyses.filter(is_healthy=True).count()
+        diseased_plants = user_analyses.filter(is_healthy=False).count()
+        
+        # Get most common species
+        species_count = {}
+        for analysis in user_analyses:
+            species = analysis.species
+            species_count[species] = species_count.get(species, 0) + 1
+        
+        most_common_species = max(species_count.items(), key=lambda x: x[1]) if species_count else None
+        
+        return Response({
+            'total_analyses': total_analyses,
+            'healthy_plants': healthy_plants,
+            'diseased_plants': diseased_plants,
+            'health_percentage': round((healthy_plants / total_analyses * 100), 1) if total_analyses > 0 else 0,
+            'most_common_species': most_common_species[0] if most_common_species else None,
+            'most_common_count': most_common_species[1] if most_common_species else 0,
+        })
+    except Exception as e:
+        return Response({
+            'error': f'Failed to get statistics: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

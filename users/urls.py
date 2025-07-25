@@ -19,4 +19,8 @@ urlpatterns = [
     path('password/reset/', views.PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('password/reset/confirm/', views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('password/change/', views.ChangePasswordView.as_view(), name='change_password'),
+
+    path('analysis-history/', views.user_analysis_history, name='analysis_history'),
+    path('save-analysis/', views.save_plant_analysis, name='save_analysis'),
+    path('analysis-statistics/', views.analysis_statistics, name='analysis_statistics'),
 ] 

@@ -23,3 +23,27 @@ class CustomUser(AbstractUser):
     class Meta:
         verbose_name = 'Utilisateur'
         verbose_name_plural = 'Utilisateurs'
+
+from django.db import models
+from django.contrib.auth import get_user_model
+from .models import CustomUser
+
+class PlantAnalysis(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='plant_analyses')
+    species = models.CharField(max_length=100)
+    disease = models.CharField(max_length=100)
+    status = models.CharField(max_length=200)
+    confidence = models.FloatField(default=0.0)
+    image_path = models.CharField(max_length=500)
+    is_healthy = models.BooleanField(default=True)
+    class_name = models.CharField(max_length=100, default='')
+    matched_plant_id = models.IntegerField(null=True, blank=True)
+    analyzed_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-analyzed_at']
+        verbose_name = 'Plant Analysis'
+        verbose_name_plural = 'Plant Analyses'
+    
+    def __str__(self):
+        return f"{self.species} - {self.disease} ({self.analyzed_at.strftime('%Y-%m-%d')})"

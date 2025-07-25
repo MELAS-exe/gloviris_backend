@@ -83,3 +83,16 @@ class ChangePasswordSerializer(serializers.Serializer):
         if not user.check_password(value):
             raise serializers.ValidationError("L'ancien mot de passe est incorrect.")
         return value 
+    
+    from rest_framework import serializers
+from .models import PlantAnalysis
+
+class PlantAnalysisSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlantAnalysis
+        fields = [
+            'id', 'species', 'disease', 'status', 'confidence', 
+            'image_path', 'is_healthy', 'class_name', 'matched_plant_id', 
+            'analyzed_at'
+        ]
+        read_only_fields = ['id', 'analyzed_at']
